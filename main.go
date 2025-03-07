@@ -5,12 +5,15 @@ import (
 	"path/filepath"
 
 	//"encoding/json"
+	"crypto/rand"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt"
 )
 
 type User struct {
@@ -20,6 +23,22 @@ type User struct {
 	email    string
 	iconurl  string
 	level    string
+}
+
+func errhandle(e any, option ...any) {
+	if e != nil {
+		log.Fatal(e)
+		if len(option) != 0 {
+			for _, el := range option {
+				log.Fatal(el)
+			}
+		}
+	}
+}
+
+func tokenInit(key any, method jwt.SigningMethod, claims jwt.Claims) (string, error) {
+	token := jwt.NewWithClaims(method, claims)
+	return token.SignedString(key)
 }
 
 func main() {
@@ -157,6 +176,22 @@ func main() {
 
 		if user.username != "" {
 			if user.password == password {
+				jwtKey := make([]byte, 32) // 生成32字节（256位）的密钥
+				_, err := rand.Read(jwtKey)
+				errhandle(err, "密钥生成错误")
+				jwtStr, err := tokenInit(jwtKey, jwt.SigningMethodHS256, jwt.MapClaims{
+					"iss": "arefd.com",
+					"aud": email,
+					"exp": time.Now().Add(time.Hour * 720).UnixMilli(),
+					"iat": time.Now().UnixMilli(),
+				})
+				if err != nil {
+					log.Fatal(err)
+					log.Fatal("token生成失败")
+				} else {
+					c.Header("Token", jwtStr)
+				}
+
 				c.HTML(http.StatusOK, "result.html", gin.H{
 					"result": "欢迎回来！",
 				})
