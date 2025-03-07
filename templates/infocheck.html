@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Check</title>
+    <link rel="icon" href="image/ARElogo-透明.png" sizes="16*16">
+    <link rel="stylesheet" type="text/css" href="css/infocheck.css">
+    <style>
+        html{
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            background-image: url("image/loginbg.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="Idask" id="signup" onclick="signupChange1()">
+        <div class="idcheck" id="signupcheck">
+            <h3 style="color: darkred;">立即注册</h3>
+            <form action="/signup" method="post" enctype="multipart/form-data" onsubmit="signupscuueed()">
+                <p>邮箱</p>
+                <p><input type="text" id="S_email" name="email"></p>
+                <p >用户名</p>
+                <p><input type="text" placeholder="用户名长度不能超过10位" id="S_user" name="username"></p>
+                <p> 性别</p>
+                <p>
+                    <span>男</span>
+                    <span><input style="width: auto;" type="radio" name="sex" value="男" checked="checked" name="sex"></span>
+                    <span>女</span>
+                    <span><input style="width: auto;" type="radio" name="sex" value="女" name="sex"></span>
+                </p>
+                <p >头像</p>
+                <p><input type="file" id="icon" accept=".jpg,.jpeg,.png,.gif" name="icon"></p>
+                <p >密码</p>
+                <p><input type="password" placeholder="密码长度至少为6位且为数字和字母的组合" id="S_pwd" name="password"></p>
+                <p >确认密码</p>
+                <p><input type="password" placeholder="两次密码需一致" id="S_repwd" onkeyup="checkpassword()"></p>
+                <span id="tishi"></span></input>
+                <p><button id="btn">注册</button></p>
+            </form>
+        </div>
+        <div class="idcheck-instruction" id="signupins">
+            <br><br>
+            <h3 class="title" style="color: darkred;">想要加入？</h3>
+            <p style="color: darkred;">请先填写信息，我们是同志了！</p>
+        </div>
+    </div>
+    <div class="Idask" id="login" onclick="loginChange1()">
+        <div class="idcheck" id="logincheck">
+            <h3 style="color: white;">立即登录</h3>
+            <form action="/login" method="post" onsubmit="loginsucceed()">
+                <p>邮箱</p>
+                <p><input type="text"id="L_email" name="email"></p>
+                <p >密码</p>
+                <p><input type="password" placeholder="密码长度至少为6位且为数字和字母的组合" id="L_pwd" name="password"></p>
+                <p><button id="btn">登录</button></p>
+                <p style="text-align: center;color: rgb(59, 194, 248);"><a href="javascript:alert('重新注册！')">忘记密码?</a></p>
+            </form>
+        </div>
+        <div class="idcheck-instruction" id="loginins">
+            <br><br>    
+            <h3 class="title" style="color: white;">已有账号？</h3>
+            <p style="color: white;">请先核验信息，欢迎回来！</p>
+        </div>
+    </div>
+    <script src="js/infocheck.js"></script>
+</body>
+</html>
