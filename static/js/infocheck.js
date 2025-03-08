@@ -105,10 +105,6 @@ function checkpassword() {
 //以上是检测内容是否符合格式的代码
 
 function signupscuueed() {
-    localStorage.setItem("username", document.getElementById("S_user").value);
-    localStorage.setItem("password", document.getElementById("S_pwd").value);
-    localStorage.setItem("email", document.getElementById("S_email").value);
-
     var S_Email = document.getElementById("S_email").value;
     var S_User = document.getElementById("S_user").value;
     var S_Iconname = document.getElementById("toux").value.split("\\").pop();
@@ -120,7 +116,7 @@ function signupscuueed() {
     } else if (S_Pwd != S_Repwd) {
         alert("请输入一致的密码！");
         return false;
-    } 
+    }
 }
 
 function loginsucceed() {
@@ -130,5 +126,28 @@ function loginsucceed() {
         alert("邮箱或密码不能为空！");
         return false;
     }
+    
+
+    var form = document.getElementById("loginform");
+    var formData = new FormData(form);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/login", true);
+    // 发送请求
+    xhr.send(formData);
+    // 监听状态变化
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // 获取单个响应头
+                var token = xhr.getResponseHeader("Token");
+                localStorage.setItem("Token",token);
+                //刷新页面
+                document.getElementById("pageContent").innerHTML = xhr.responseText;
+            } else {
+                console.error("XMLHttpRequest failed with status:", xhr.status);
+            }
+        }
+    };
+    return false;
 }
 //以上为表单提交校验代码

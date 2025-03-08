@@ -24,7 +24,7 @@
     <div class="Idask" id="signup" onclick="signupChange1()">
         <div class="idcheck" id="signupcheck">
             <h3 style="color: darkred;">立即注册</h3>
-            <form action="/signup" method="post" enctype="multipart/form-data" onsubmit="signupscuueed()">
+            <form action="/signup" method="post" enctype="multipart/form-data" id="signupform" onsubmit="signupscuueed()">
                 <p>邮箱</p>
                 <p><input type="text" id="S_email" name="email"></p>
                 <p >用户名</p>
@@ -55,7 +55,7 @@
     <div class="Idask" id="login" onclick="loginChange1()">
         <div class="idcheck" id="logincheck">
             <h3 style="color: white;">立即登录</h3>
-            <form action="/login" method="post" onsubmit="loginsucceed()">
+            <form action="/login" method="post" id="loginform" onsubmit="loginsucceed()">
                 <p>邮箱</p>
                 <p><input type="text"id="L_email" name="email"></p>
                 <p >密码</p>
