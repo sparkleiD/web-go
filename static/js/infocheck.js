@@ -139,8 +139,8 @@ function loginsucceed() {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
                 // 获取单个响应头
-                var token = xhr.getResponseHeader("Token");
-                localStorage.setItem("Token",token);
+                var token = xhr.getResponseHeader("Authorization");
+                localStorage.setItem("Authorization",token);
                 //刷新页面
                 document.getElementById("pageContent").innerHTML = xhr.responseText;
             } else {

@@ -5,7 +5,8 @@ import (
 	"path/filepath"
 
 	//"encoding/json"
-	"crypto/rand"
+	//"crypto/rand"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -36,12 +37,25 @@ func errhandle(e any, option ...any) {
 	}
 }
 
-func tokenInit(key any, method jwt.SigningMethod, claims jwt.Claims) (string, error) {
-	token := jwt.NewWithClaims(method, claims)
-	return token.SignedString(key)
+func ParseJwtWithClaims(key any, jwtStr string) (jwt.MapClaims, error) {
+	mc := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(jwtStr, mc, func(token *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	// 校验 Claims 对象是否有效，基于 exp（过期时间），nbf（不早于），iat（签发时间）等进行判断（如果有这些声明的话）。
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return mc, nil
 }
 
 func main() {
+	//定义jwt密钥(暂时)
+	jwtKey := []byte{147, 177, 39, 92, 144, 145, 21, 252, 239, 187, 17, 39, 46, 207, 26, 112, 131, 66, 9, 141, 112, 83, 239, 187, 166, 237, 7, 245, 35, 176, 174, 210}
+
 	router := gin.Default() //新建路由对象
 
 	router.LoadHTMLGlob("templates/*.html")
@@ -56,7 +70,24 @@ func main() {
 	})
 
 	router.GET("/infocheck", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "infocheck.html", gin.H{})
+		Token := c.GetHeader("Authorization")
+		log.Println(Token)
+		//此处逻辑表达式非为最简，但因为一些问题只能暂时这么写
+		if Token != "" && Token != "null" {
+			claims, err := ParseJwtWithClaims(jwtKey, Token)
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println(claims["aud"])
+			/*======================
+			   此处有bug未处理!！
+			======================*/
+			c.HTML(http.StatusOK, "result.html", gin.H{
+				"result": "欢迎回来!",
+			})
+		} else {
+			c.HTML(http.StatusOK, "infocheck.html", gin.H{})
+		}
 	})
 
 	router.POST("/ajax/userinfo", func(c *gin.Context) {
@@ -162,9 +193,7 @@ func main() {
 		}
 
 		sqlcheckresp, sqlerr3 := sqlsent.Query(email)
-		if sqlerr3 != nil {
-			log.Fatal(sqlerr3)
-		}
+		errhandle(sqlerr3)
 		var user User
 		for sqlcheckresp.Next() {
 			sqlerr4 := sqlcheckresp.Scan(&user.username, &user.password, &user.sex, &user.email, &user.iconurl, &user.level)
@@ -176,20 +205,22 @@ func main() {
 
 		if user.username != "" {
 			if user.password == password {
-				jwtKey := make([]byte, 32) // 生成32字节（256位）的密钥
+				/*jwtKey := make([]byte, 32)
+				// 生成32字节（256位）的密钥
 				_, err := rand.Read(jwtKey)
-				errhandle(err, "密钥生成错误")
-				jwtStr, err := tokenInit(jwtKey, jwt.SigningMethodHS256, jwt.MapClaims{
+				errhandle(err, "密钥生成错误")*/
+				token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 					"iss": "arefd.com",
-					"aud": email,
+					"aud": user.username,
 					"exp": time.Now().Add(time.Hour * 720).UnixMilli(),
-					"iat": time.Now().UnixMilli(),
+					//"iat": time.Now().UnixMilli(),
 				})
+				jwtStr, err := token.SignedString(jwtKey)
 				if err != nil {
 					log.Fatal(err)
 					log.Fatal("token生成失败")
 				} else {
-					c.Header("Token", jwtStr)
+					c.Header("Authorization", jwtStr)
 				}
 
 				c.HTML(http.StatusOK, "result.html", gin.H{

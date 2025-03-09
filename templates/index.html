@@ -68,7 +68,7 @@
 <body>
     <div class="begin">
         <h1>欢迎访问 ARE 基金会 !</h1>
-        <form action="/infocheck" method="get">
+        <form action="/infocheck" method="get" id="htmlget" onsubmit="tokenCheck()">
             <p><button class="idask">进入基金会</button></p>
             <!--form的get和jQuery的$get函数在gin看来是有区别的，所以此处要用表单提交-->
         </form>
@@ -83,4 +83,13 @@
         <p><a href="">收容区域</a></p>
     </div>
 </body>
+<script>
+    function tokenCheck(){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET","/infocheck", true);
+        xhr.setRequestHeader("Authorization",localStorage.getItem("Authorization"));
+        xhr.send();
+        return false;
+    }
+</script>
 </html>
