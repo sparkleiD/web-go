@@ -141,13 +141,13 @@ function loginsucceed() {
                 // 获取单个响应头
                 var token = xhr.getResponseHeader("Authorization");
                 localStorage.setItem("Authorization",token);
-                //刷新页面
-                document.getElementById("pageContent").innerHTML = xhr.responseText;
+                /*刷新页面不需要下方代码
+                document.getElementById("pageContent").innerHTML = xhr.responseText;*/
             } else {
                 console.error("XMLHttpRequest failed with status:", xhr.status);
             }
         }
-    };
+    }
     return false;
 }
 //以上为表单提交校验代码

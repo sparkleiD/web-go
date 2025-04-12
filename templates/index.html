@@ -66,21 +66,21 @@
     }
 </style>
 <body>
-    <div class="begin">
-        <h1>欢迎访问 ARE 基金会 !</h1>
-        <form action="/infocheck" method="get" id="htmlget" onsubmit="tokenCheck()">
-            <p><button class="idask">进入基金会</button></p>
-            <!--form的get和jQuery的$get函数在gin看来是有区别的，所以此处要用表单提交-->
-        </form>
-        <hr>
-        <img src="image/最新宣传标语-透明.png" class="pic">
-    </div>
-    <div class="guide">
-        <p><a href="">基金会概述</a></p>
-        <p><a href="">基金会宗旨</a></p>
-        <p><a href="">员工等级</a></p>
-        <p><a href="">收容物等级</a></p>
-        <p><a href="">收容区域</a></p>
+    <div id="pageContent">
+        <div class="begin">
+            <h1>欢迎访问 ARE 基金会 !</h1>
+            <p><button class="idask" onclick="tokenCheck()">进入基金会</button></p>
+            <!--form的get和jQuery的$get函数在gin看来是有区别的，所以此处要用表单提交    好古早的注释，算了不删了2025/3/22-->
+            <hr>
+            <img src="image/最新宣传标语-透明.png" class="pic">
+        </div>
+        <div class="guide">
+            <p><a href="">基金会概述</a></p>
+            <p><a href="">基金会宗旨</a></p>
+            <p><a href="">员工等级</a></p>
+            <p><a href="">收容物等级</a></p>
+            <p><a href="">收容区域</a></p>
+        </div>
     </div>
 </body>
 <script>
@@ -89,7 +89,21 @@
         xhr.open("GET","/infocheck", true);
         xhr.setRequestHeader("Authorization",localStorage.getItem("Authorization"));
         xhr.send();
-        return false;
+        xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                //刷新页面
+                /*此处如果用下方代码会出现js加载不出的情况
+                document.documentElement.innerHTML = xhr.responseText;*/
+                document.open();
+                document.write(xhr.responseText);
+                document.close();
+                window.history.pushState({},"", "infocheck?");
+                } else {
+                console.error("XMLHttpRequest failed with status:", xhr.status);
+                }
+            }
+        }
     }
 </script>
 </html>

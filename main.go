@@ -28,12 +28,12 @@ type User struct {
 
 func errhandle(e any, option ...any) {
 	if e != nil {
-		log.Fatal(e)
 		if len(option) != 0 {
 			for _, el := range option {
-				log.Fatal(el)
+				log.Println(el)
 			}
 		}
+		panic(e)
 	}
 }
 
@@ -77,15 +77,15 @@ func main() {
 			claims, err := ParseJwtWithClaims(jwtKey, Token)
 			if err != nil {
 				log.Println(err)
+			} else {
+				log.Println(claims["aud"])
 			}
-			log.Println(claims["aud"])
-			/*======================
-			   此处有bug未处理!！
-			======================*/
+			log.Println("准备返回 result.html")
 			c.HTML(http.StatusOK, "result.html", gin.H{
 				"result": "欢迎回来!",
 			})
 		} else {
+			log.Println("进入 else 分支，返回 infocheck.html")
 			c.HTML(http.StatusOK, "infocheck.html", gin.H{})
 		}
 	})
@@ -97,24 +97,24 @@ func main() {
 		defer db.Close()
 		if sqlerr1 != nil {
 			fmt.Println("DBconn fail!")
-			log.Fatal(sqlerr1)
+			panic(sqlerr1)
 		} else {
 			fmt.Println("DBconn success!")
 		}
 		sqlsent, sqlerr2 := db.Prepare("SELECT email FROM users WHERE email = ?")
 		if sqlerr2 != nil {
-			log.Fatal(sqlerr2)
+			panic(sqlerr2)
 		}
 
 		sqlcheckresp, sqlerr3 := sqlsent.Query(email)
 		if sqlerr3 != nil {
-			log.Fatal(sqlerr3)
+			panic(sqlerr3)
 		}
 		var user User
 		for sqlcheckresp.Next() {
 			sqlerr4 := sqlcheckresp.Scan(&user.email)
 			if sqlerr4 != nil {
-				log.Fatal(sqlerr4)
+				panic(sqlerr4)
 			}
 			log.Println(user.email)
 		}
@@ -133,13 +133,13 @@ func main() {
 
 		icon, err := c.FormFile("icon")
 		if err != nil {
-			log.Fatal("图片获取失败：", err)
+			panic(err)
 		}
 		iconext := filepath.Ext(icon.Filename)
 		fileName := email + iconext
 		filePath := "icon/" + fileName
 		if err := c.SaveUploadedFile(icon, "static/"+filePath); err != nil {
-			log.Fatal("保存文件失败：", err)
+			panic(err)
 		}
 
 		fmt.Println("email:", email)
@@ -150,18 +150,18 @@ func main() {
 		defer db.Close()
 		if sqlerr1 != nil {
 			fmt.Println("DBconn fail!")
-			log.Fatal(sqlerr1)
+			panic(sqlerr1)
 		} else {
 			fmt.Println("DBconn success!")
 		}
 		sqlsent, sqlerr2 := db.Prepare("INSERT INTO users VALUES (? , ? , ? , ? , ? ,'δ')")
 		if sqlerr2 != nil {
-			log.Fatal(sqlerr2)
+			panic(sqlerr2)
 		}
 
 		_, sqlerr3 := sqlsent.Exec(username, password, sex, email, filePath)
 		if sqlerr3 != nil {
-			log.Fatal(sqlerr3)
+			log.Println(sqlerr3)
 			c.HTML(http.StatusFailedDependency, "result.html", gin.H{
 				"result": "数据插入错误！",
 			})
@@ -183,13 +183,13 @@ func main() {
 		defer db.Close()
 		if sqlerr1 != nil {
 			fmt.Println("DBconn fail!")
-			log.Fatal(sqlerr1)
+			panic(sqlerr1)
 		} else {
 			fmt.Println("DBconn success!")
 		}
 		sqlsent, sqlerr2 := db.Prepare("SELECT * FROM users WHERE email = ?")
 		if sqlerr2 != nil {
-			log.Fatal(sqlerr2)
+			panic(sqlerr2)
 		}
 
 		sqlcheckresp, sqlerr3 := sqlsent.Query(email)
@@ -198,7 +198,7 @@ func main() {
 		for sqlcheckresp.Next() {
 			sqlerr4 := sqlcheckresp.Scan(&user.username, &user.password, &user.sex, &user.email, &user.iconurl, &user.level)
 			if sqlerr4 != nil {
-				log.Fatal(sqlerr4)
+				panic(sqlerr4)
 			}
 			log.Println(user.username, user.password, user.sex, user.email, user.iconurl, user.level)
 		}
@@ -217,8 +217,7 @@ func main() {
 				})
 				jwtStr, err := token.SignedString(jwtKey)
 				if err != nil {
-					log.Fatal(err)
-					log.Fatal("token生成失败")
+					log.Println("token生成失败:", err)
 				} else {
 					c.Header("Authorization", jwtStr)
 				}
