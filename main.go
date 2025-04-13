@@ -17,6 +17,9 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+// 定义jwt密钥(暂时)
+var jwtKey = []byte{147, 177, 39, 92, 144, 145, 21, 252, 239, 187, 17, 39, 46, 207, 26, 112, 131, 66, 9, 141, 112, 83, 239, 187, 166, 237, 7, 245, 35, 176, 174, 210}
+
 type User struct {
 	username string
 	password string
@@ -52,10 +55,24 @@ func ParseJwtWithClaims(key any, jwtStr string) (jwt.MapClaims, error) {
 	return mc, nil
 }
 
-func main() {
-	//定义jwt密钥(暂时)
-	jwtKey := []byte{147, 177, 39, 92, 144, 145, 21, 252, 239, 187, 17, 39, 46, 207, 26, 112, 131, 66, 9, 141, 112, 83, 239, 187, 166, 237, 7, 245, 35, 176, 174, 210}
+func cookieAuth(c *gin.Context) {
+	cookie, err := c.Cookie("auth")
+	if err != nil {
+		c.Set("authStatus", false)
+		c.Next()
+	}
+	claims, err := ParseJwtWithClaims(jwtKey, cookie)
+	if err != nil {
+		c.Set("authStatus", false)
+		c.Next()
+	} else {
+		log.Println(claims["aud"])
+		c.Set("authStatus", true)
+		c.Next()
+	}
+}
 
+func main() {
 	router := gin.Default() //新建路由对象
 
 	router.LoadHTMLGlob("templates/*.html")
@@ -69,23 +86,15 @@ func main() {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
-	router.GET("/infocheck", func(c *gin.Context) {
-		Token := c.GetHeader("Authorization")
-		log.Println(Token)
-		//此处逻辑表达式非为最简，但因为一些问题只能暂时这么写
-		if Token != "" && Token != "null" {
-			claims, err := ParseJwtWithClaims(jwtKey, Token)
-			if err != nil {
-				log.Println(err)
-			} else {
-				log.Println(claims["aud"])
-			}
-			log.Println("准备返回 result.html")
+	router.GET("/infocheck", cookieAuth, func(c *gin.Context) {
+		authStatus, _ := c.MustGet("authStatus").(bool)
+		if authStatus {
+			//log.Println("准备返回 result.html")
 			c.HTML(http.StatusOK, "result.html", gin.H{
 				"result": "欢迎回来!",
 			})
 		} else {
-			log.Println("进入 else 分支，返回 infocheck.html")
+			//log.Println("进入 else 分支，返回 infocheck.html")
 			c.HTML(http.StatusOK, "infocheck.html", gin.H{})
 		}
 	})
@@ -219,7 +228,15 @@ func main() {
 				if err != nil {
 					log.Println("token生成失败:", err)
 				} else {
-					c.Header("Authorization", jwtStr)
+					c.SetCookie(
+						"auth",
+						jwtStr,
+						2592000,
+						"/",
+						"localhost",
+						false,
+						true,
+					)
 				}
 
 				c.HTML(http.StatusOK, "result.html", gin.H{

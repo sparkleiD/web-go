@@ -69,8 +69,12 @@
     <div id="pageContent">
         <div class="begin">
             <h1>欢迎访问 ARE 基金会 !</h1>
-            <p><button class="idask" onclick="tokenCheck()">进入基金会</button></p>
-            <!--form的get和jQuery的$get函数在gin看来是有区别的，所以此处要用表单提交    好古早的注释，算了不删了2025/3/22-->
+            <form action="/infocheck" method="get">
+            <p><button class="idask">进入基金会</button></p>
+            <!--form的get和jQuery的$get函数在gin看来是有区别的，所以此处要用表单提交    
+            --好古早的注释，算了不删了2025/3/22
+            --又来改这个玩意了，没想到原来那种方法真的还不错(ps.jQuery好像已经死完了)2025/4/13-->
+            </form>
             <hr>
             <img src="image/最新宣传标语-透明.png" class="pic">
         </div>
@@ -83,27 +87,4 @@
         </div>
     </div>
 </body>
-<script>
-    function tokenCheck(){
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET","/infocheck", true);
-        xhr.setRequestHeader("Authorization",localStorage.getItem("Authorization"));
-        xhr.send();
-        xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                //刷新页面
-                /*此处如果用下方代码会出现js加载不出的情况
-                document.documentElement.innerHTML = xhr.responseText;*/
-                document.open();
-                document.write(xhr.responseText);
-                document.close();
-                window.history.pushState({},"", "infocheck?");
-                } else {
-                console.error("XMLHttpRequest failed with status:", xhr.status);
-                }
-            }
-        }
-    }
-</script>
 </html>
